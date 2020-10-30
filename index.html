@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background: #091430;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <script src="https://gw.alipayobjects.com/os/lib/antv/g6/3.8.3/dist/g6.min.js"></script>
+    <script>
+
+        /**
+         * 疑问点：
+         * 为什么圆心都是(0,0)
+         * 图片链接只能通过http访问?使用daraurl也可以
+         */
+        // Custom a mark node
+        G6.registerNode('justPoints', {
+            draw(cfg, group) {
+                let keyShape
+                //  最里面圆的半径
+                const baseR = 30;
+                // 最外面和相邻内层的间距
+                const out = 60
+                // angle角度
+                let nowAngle = 0;
+
+                // Ref line
+                let refR = baseR;
+                const refInc = 10;
+                // gap指的是内圈第二层的间隙长度
+                const gap = 20
+                // 生成5个圆环
+                for (let i = 0; i < 5; i++) {
+                    const r = i < 4 ? (refR += refInc) : refR + out
+                    let lineDash
+                    let stroke
+                    if (i === 0) {
+                        stroke = cfg.color
+
+                    } else {
+                        stroke = '#3AE7D6'
+                    }
+                    if (i === 1) {
+                        lineDash = [(2 * Math.PI * r - gap * 4) / 4, 20]
+                    }
+                    if (i === 2) {
+                        lineDash = [5, 2]
+                    }
+                    // 返回最外层的圆环为keyshape，响应drag-node
+                    keyShape = group.addShape('circle', {
+
+                        attrs: {
+                            x: 0,
+                            y: 0,
+                            r,  // 每外侧比内层圆环的半径多refInc
+                            stroke,
+                            fill: 'transparent', // 必须给fill一个颜色，透明也行，否则在节点内部空白区域拖动的话不起效果
+                            lineDash,
+                            // fill: i === 0 ? 'red' : '',
+                            shadowColor: '#5ad8a6',
+                        },
+                        name: 'circle-shape',
+                        draggable: true
+                    });
+
+
+                }
+                const everyIncAngle = (2 * Math.PI * (360 / cfg.details.length)) / 360;
+                nowAngle = nowAngle + everyIncAngle / 2;
+                cfg.details.forEach((cat) => {
+                    // 计算六边形的位置
+                    const postions = [];
+                    cat.values.forEach((item, index) => {
+                        const r = baseR + item;  //160
+                        const xPos = r * Math.cos(nowAngle);
+                        const yPos = r * Math.sin(nowAngle);
+                        nowAngle += everyIncAngle;
+                        postions.push([xPos, yPos]);
+                        // if (index === 4) {
+                        //     const r = baseR + item;
+                        //     const xPos = r * Math.cos(nowAngle);
+                        //     const yPos = r * Math.sin(nowAngle);
+                        //     postions.push([xPos, yPos]);
+                        // }
+                    });
+
+                    // 添加六边形
+                    postions.forEach((pos, index) => {
+                        if (index !== 5) {
+                            // 六边形的宽高
+                            // hexagonWidth
+                            // hexagonWidth
+                            let hexagonWidth = 55
+                            let hexagonHeight = 60
+                            group.addShape('path', {
+
+                                attrs: {
+                                    path: [
+                                        ['M', pos[0], pos[1] - hexagonHeight / 2], // 上部顶点
+                                        ['L', pos[0] + hexagonWidth / 2, pos[1] - hexagonHeight / 4], // 右侧顶点
+                                        ['L', pos[0] + hexagonWidth / 2, pos[1] + hexagonHeight / 4], // 下部顶点
+                                        ['L', pos[0], pos[1] + hexagonHeight / 2], // 左侧顶点
+                                        ['L', pos[0] - hexagonWidth / 2, pos[1] + hexagonHeight / 4],
+                                        ['L', pos[0] - hexagonWidth / 2, pos[1] - hexagonHeight / 4],
+                                        ['Z'], // 封闭
+                                    ], // 根据配置获取路径
+                                    shadowColor: cat.color,
+                                    shadowBlur: 10,
+                                    // shadowOffsetX:1 ,
+                                    // shadowOffsetY:1,
+                                    lineWidth: 1,
+                                    fill: '#091430',
+                                    // shadowOffsetX:-1,
+                                    // shadowOffsetY:-1,
+                                    stroke: cat.color, // 颜色应用到描边上，如果应用到填充，则使用 fill: cfg.color
+
+                                },
+                                // must be assigned in G6 3.3 and later versions. it can be any value you want
+                                name: 'path-shape',
+                                // 设置 draggable 以允许响应鼠标的图拽事件
+                                draggable: true
+
+                                // name: 'circle-marker-shape',
+
+                            });
+
+                            // 添加图标
+                            let width = 20
+                            let height = 15
+                            group.addShape('image', {
+
+                                attrs: {
+                                    x: pos[0] - width / 2, // x,y是图片左上角的坐标
+                                    y: pos[1] - height,
+                                    width,
+                                    height,
+                                    img: 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjA0MDIzMDk2NTE3IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjMzOTEiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PGRlZnM+PHN0eWxlIHR5cGU9InRleHQvY3NzIj48L3N0eWxlPjwvZGVmcz48cGF0aCBkPSJNODUzLjcgNjMuN2MtMjAuNS0xMy4yLTQ4LjktMjQuOC04NC40LTM0LjVDNzAwLjIgMTAuNCA2MDguOCAwIDUxMiAwUzMyMy44IDEwLjQgMjU0LjcgMjkuMmMtMzUuNSA5LjctNjMuOSAyMS4zLTg0LjQgMzQuNUMxNTEgNzYuMiAxMjggOTcuNCAxMjggMTI4djc2OGMwIDMwLjYgMjMgNTEuOCA0Mi4zIDY0LjMgMjAuNSAxMy4yIDQ4LjkgMjQuOCA4NC40IDM0LjUgNjkuMSAxOC45IDE2MC41IDI5LjIgMjU3LjMgMjkuMnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMzUuNS05LjcgNjMuOS0yMS4zIDg0LjQtMzQuNUM4NzMgOTQ3LjggODk2IDkyNi42IDg5NiA4OTZWMTI4YzAtMzAuNi0yMy01MS44LTQyLjMtNjQuM3pNODMyIDM4My4xYy0zIDUuOS0yNSAyNC43LTkxLjcgNDEuMUM2NzggNDM5LjUgNTk2LjkgNDQ4IDUxMiA0NDhzLTE2Ni04LjUtMjI4LjMtMjMuOEMyMTcgNDA3LjcgMTk1IDM4OSAxOTIgMzgzLjFWMjA0LjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCAyNDUuNiA0MTUuMiAyNTYgNTEyIDI1NnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOHogbTAgMjU2Yy0zIDUuOS0yNSAyNC43LTkxLjcgNDEuMUM2NzggNjk1LjUgNTk2LjkgNzA0IDUxMiA3MDRzLTE2Ni04LjUtMjI4LjMtMjMuOEMyMTcgNjYzLjcgMTk1IDY0NSAxOTIgNjM5LjFWNDYwLjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCA1MDEuNiA0MTUuMiA1MTIgNTEyIDUxMnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOHpNMjgzLjcgODcuOEMzNDYgNzIuNSA0MjcuMSA2NCA1MTIgNjRzMTY2IDguNSAyMjguMyAyMy44YzYzLjQgMTUuNiA4Ni40IDMzLjQgOTEuMSA0MC4yLTQuNiA2LjgtMjcuNyAyNC41LTkxLjEgNDAuMkM2NzggMTgzLjUgNTk2LjkgMTkyIDUxMiAxOTJzLTE2Ni04LjUtMjI4LjMtMjMuOGMtNjMuNC0xNS42LTg2LjQtMzMuNC05MS4xLTQwLjIgNC42LTYuOCAyNy42LTI0LjUgOTEuMS00MC4yeiBtNDU2LjYgODQ4LjRDNjc4IDk1MS41IDU5Ni45IDk2MCA1MTIgOTYwcy0xNjYtOC41LTIyOC4zLTIzLjhDMjE3LjEgOTE5LjcgMTk1IDkwMSAxOTIgODk1LjFWNzE2LjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCA3NTcuNiA0MTUuMiA3NjggNTEyIDc2OHMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOGMtMyA1LjktMjUuMSAyNC42LTkxLjcgNDEuMXoiIGZpbGw9IiNmZmZmZmYiIHAtaWQ9IjMzOTIiPjwvcGF0aD48L3N2Zz4=',
+                                },
+                                // must be assigned in G6 3.3 and later versions. it can be any value you want
+                                name: 'image-shape',
+                            });
+
+                            // 添加六边形内的文本节点
+                            group.addShape('text', {
+                                // attrs: style
+                                attrs: {
+                                    x: pos[0], // 居中
+                                    y: pos[1],
+                                    textAlign: 'center',
+                                    textBaseline: 'top',
+                                    text: cat.label,
+                                    fontSize: 10,
+                                    fill: '#D5D7E3',
+                                },
+                                // must be assigned in G6 3.3 and later versions. it can be any value you want
+                                name: 'text-shape',
+                                // 设置 draggable 以允许响应鼠标的图拽事件
+                                draggable: true,
+                            });
+
+                        }
+                    });
+                });
+
+                // let nowAngle2 = 0;
+                // const everyIncAngleCat = (2 * Math.PI * (360 / 5)) / 360;
+                // 横穿圆环的竖线
+                // for (let i = 0; i < 5; i++) {
+                //     const r = 30 + 50;
+                //     const xPos = r * Math.cos(nowAngle2);
+                //     const yPos = r * Math.sin(nowAngle2);
+
+                //     group.addShape('path', {
+                //         attrs: {
+                //             path: [
+                //                 ['M', 0, 0],
+                //                 ['L', xPos, yPos],
+                //             ],
+                //             lineDash: [4, 4],
+                //             stroke: '#5ad8a6',
+                //         },
+                //         name: 'path-shape',
+                //     });
+                //     nowAngle2 += everyIncAngleCat;
+                // }
+                // add a circle with the same color with the background color
+
+                // 添加内层圆的label
+                if (cfg.label) {
+                    group.addShape('text', {
+
+                        attrs: {
+                            x: 0,
+                            y: 0,
+                            textAlign: 'center',
+                            textBaseline: 'middle',
+                            text: cfg.label,
+                            fill: '#fff',
+                            fontStyle: 'bold',
+                        },
+                        name: 'text-shape',
+                    });
+                }
+
+                // return keyShape;
+                return group;
+            },
+            afterDraw(cfg, group) {
+                const r = 40
+                // 
+                /**
+                 * 节点动画的实现思路
+                 * 创建三个圆
+                 * 每个圆在一次动画周期内r + 10
+                 * 设置动画间隔、是否重复等
+                 */
+                const attrs = {
+                    x: 0,
+                    y: 0,
+                    r,
+                    // fill: cfg.color,
+                    stroke: cfg.color,
+                    opacity: 0.6,
+                }
+                const back1 = group.addShape('circle', {
+                    zIndex: -3,
+                    attrs,
+                    name: 'back1-shape',
+                });
+                const back2 = group.addShape('circle', {
+                    zIndex: -2,
+                    attrs,
+                    name: 'back2-shape',
+                });
+                const back3 = group.addShape('circle', {
+                    zIndex: -1,
+                    attrs,
+                    name: 'back3-shape',
+                });
+                group.sort(); // Sort according to the zIndex
+                back1.animate(
+                    {
+                        // Magnifying and disappearing
+                        r: r + 10,
+                        opacity: 0.1,
+                    },
+                    {
+                        duration: 3000,
+                        easing: 'easeCubic',
+                        delay: 0,
+                        repeat: true, // repeat
+                    },
+                ); // no delay
+                back2.animate(
+                    {
+                        // Magnifying and disappearing
+                        r: r + 10,
+                        opacity: 0.1,
+                    },
+                    {
+                        duration: 3000,
+                        easing: 'easeCubic',
+                        delay: 1000,
+                        repeat: true, // repeat
+                    },
+                ); // 1s delay
+                back3.animate(
+                    {
+                        // Magnifying and disappearing
+                        r: r + 10,
+                        opacity: 0.1,
+                    },
+                    {
+                        duration: 3000,
+                        easing: 'easeCubic',
+                        delay: 2000,
+                        repeat: true, // repeat
+                    },
+                ); // 3s delay
+
+                // 给圆的虚线边添加动画
+                const shape = group.get('children')[4];
+                let index = 0;
+                let gap = 20
+                // Define the animation
+                shape.animate(
+                    () => {
+                        index++;
+                        if (index > (2 * Math.PI * r - gap * 4) / 4 + 20) {
+                            index = 0;
+                        }
+                        const res = {
+                            lineDash: [(2 * Math.PI * r - gap * 4) / 4, 20],
+                            lineDashOffset: -index,
+                        };
+                        // returns the modified configurations here, lineDash and lineDashOffset here
+                        return res;
+                    },
+                    {
+                        repeat: true, // whether executes the animation repeatly
+                        duration: 10000, // the duration for executing once
+                    },
+                );
+            },
+            // 响应状态变化
+            setState(name, value, item) {
+                // 怎么响应各个子六边形的点击事件
+                const group = item.getContainer();
+                const shape = group.get('children')[0]; // 顺序根据 draw 时确定
+                if (name === 'selected') {
+                    // if (value) {
+                    //     shape.attr('fill', 'red');
+                    // } else {
+                    //     shape.attr('fill', 'white');
+                    // }
+                }
+            },
+        });
+
+        const width = document.getElementById('container').scrollWidth;
+        const height = document.getElementById('container').scrollHeight || 500;
+        const graph = new G6.Graph({
+            container: 'container',
+            width,
+            height,
+            modes: {
+                default: ['drag-node']
+            },
+            renderer: 'svg',
+            // translate the graph to align the canvas's center, support by v3.5.1
+            fitCenter: true,
+        });
+
+        const data = {
+            nodes: [
+                {
+                    id: 'nodeC',
+                    x: 150,
+                    y: 150,
+                    label: 'iFrameMS',
+                    type: 'justPoints',
+                    anchorPoints: [
+                        [0, 0.5],
+                        [1, 0.5],
+                    ],
+                    // 动画颜色
+                    color: '#40a9ff',
+                    details: [
+                        { cat: 'pv', values: [100], color: '#22A3C3', label: 'kafka' },
+                        { cat: 'dal', values: [100], color: '#22A3C3', label: 'kafka' },
+                        { cat: 'uv', values: [100], color: '#22A3C3', label: 'kafka' },
+                        { cat: 'sal', values: [100], color: '#22A3C3', label: 'kafka' },
+                        { cat: 'cal', values: [100], color: '#22A3C3', label: 'kafka' },
+                        { cat: 'cal', values: [100], color: '#22A3C3', label: 'kafka' },
+                        { cat: 'cal', values: [100], color: '#22A3C3', label: 'kafka' },
+                        { cat: 'cal', values: [100], color: '#22A3C3', label: 'kafka' },
+                    ],
+                    centerColor: '#5b8ff9',
+                },
+                // {
+                //     id: 'nodeC2',
+                //     x: 500,
+                //     y: 150,
+                //     label: 'Point2',
+                //     type: 'justPoints',
+                //     anchorPoints: [
+                //         [0, 0.5],
+                //         [1, 0.5],
+                //     ],
+                //     details: [
+                //         { cat: 'pv', values: [10, 10, 50, 20, 10], color: '#5ad8a6' },
+                //         { cat: 'dal', values: [20, 30, 10, 50, 40], color: '#ff99c3' },
+                //         { cat: 'uv', values: [10, 50, 30, 20, 30], color: '#6dc8ec' },
+                //         { cat: 'sal', values: [50, 30, 20, 20, 20], color: '#269a99' },
+                //         { cat: 'cal', values: [50, 10, 20, 50, 30], color: '#9270CA' },
+                //     ],
+                //     centerColor: '#5b8ff9',
+                // },
+            ],
+            edges: [
+                {
+                    source: 'nodeC',
+                    target: 'nodeC2',
+                },
+            ],
+        };
+
+        graph.data(data);
+        graph.render();
+        graph.on('node:click', e => {
+            const node = e.item
+            graph.setItemState(node, 'selected', true)
+        })
+        /**
+         * nvert:多边形有几个顶点
+         * vertx:每个顶点的x坐标的数组
+         * verty:每个顶点的y坐标的数组
+         * testx:要测试的点的x坐标
+         * testy:要测试的点的y坐标
+         */
+        function pnpoly(nvert, vertx, verty, testx, testy) {
+            var i, j, c = 0;
+            for (i = 0, j = nvert - 1; i < nvert; j = i++) {
+                if (((verty[i] > testy) != (verty[j] > testy)) &&
+                    (testx < (vertx[j] - vertx[i]) * (testy - verty[i]) / (verty[j] - verty[i]) + vertx[i]))
+                    c = !c;
+            }
+            return c;
+        }
+
+        let vertx = [1,2,2,1,0,0]
+        let verty = [0,1,2,3,2,1]
+        console.log("是否:",pnpoly(6,vertx,verty,1,1))
+    </script>
+</body>
+
+</html>
