@@ -180,28 +180,6 @@
                     });
                 });
 
-                // let nowAngle2 = 0;
-                // const everyIncAngleCat = (2 * Math.PI * (360 / 5)) / 360;
-                // 横穿圆环的竖线
-                // for (let i = 0; i < 5; i++) {
-                //     const r = 30 + 50;
-                //     const xPos = r * Math.cos(nowAngle2);
-                //     const yPos = r * Math.sin(nowAngle2);
-
-                //     group.addShape('path', {
-                //         attrs: {
-                //             path: [
-                //                 ['M', 0, 0],
-                //                 ['L', xPos, yPos],
-                //             ],
-                //             lineDash: [4, 4],
-                //             stroke: '#5ad8a6',
-                //         },
-                //         name: 'path-shape',
-                //     });
-                //     nowAngle2 += everyIncAngleCat;
-                // }
-                // add a circle with the same color with the background color
 
                 // 添加内层圆的label
                 if (cfg.label) {
@@ -319,7 +297,7 @@
                     },
                     {
                         repeat: true, // whether executes the animation repeatly
-                        duration: 10000, // the duration for executing once
+                        duration: 3000, // the duration for executing once
                     },
                 );
                 // 小虚线
@@ -340,7 +318,7 @@
                     },
                     {
                         repeat: true, // whether executes the animation repeatly
-                        duration: 10000, // the duration for executing once
+                        duration: 3000, // the duration for executing once
                     },
                 );
             },
@@ -412,16 +390,24 @@
 
         graph.data(data);
         graph.render();
-
+        let hexagonShapes = []
         graph.on('node:mouseover', e => {
-            console.log(e)
+
             const node = e.item
             // 获取鼠标点击的x,y
             const testx = e.x
             const testy = e.y
             const nodeX = node.get('model').x
             const nodeY = node.get('model').y
-            node.get('group').cfg.children.forEach(shape => {
+            // 第一次将hexagon-shape筛选出来，下次直接遍历过滤后的，这样性能好一点,减小动画的卡动感
+            if (!hexagonShapes.length) {
+
+                hexagonShapes = node.get('group').cfg.children.filter(shape => {
+                    return shape.cfg.name === 'hexagon-shape'
+
+                })
+            }
+            hexagonShapes.forEach(shape => {
                 if (shape.cfg.name === 'hexagon-shape') {
 
                     // 计算每个六边形的6个顶点的坐标
@@ -429,42 +415,31 @@
                     // let { x, y, maxX, maxY } = shape.cfg.bbox
                     const path = shape.attrs.path
                     // 还需要加上节点的x，y坐标
-
-                    // maxX += nodeX
-
-                    // maxY += nodeY
-                    // const vertx = [x, x + maxX / 2, x + maxX, x + maxX, x + maxX / 2, x]
-                    // const verty = [y + maxY / 4, y, y + maxY / 4, y + 3 * maxY / 4, y + maxY, y + 3 * maxY / 4]
                     const vertx = [nodeX + path[0][1], nodeX + path[1][1], nodeX + path[2][1], nodeX + path[3][1], nodeX + path[4][1], nodeX + path[5][1]]
                     const verty = [nodeY + path[0][2], nodeY + path[1][2], nodeY + path[2][2], nodeY + path[3][2], nodeY + path[4][2], nodeY + path[5][2]]
                     const isInHex = pnpoly(data.nodes[0].details.length, vertx, verty, testx, testy)
                     // 在六边形内的话，找到shape，高亮该shape
                     if (isInHex) {
                         shape.attrs.fill = color
+
                     } else {
                         // 在元素内部移出六边形的时候，恢复颜色
                         shape.attrs.fill = hexagonFill
                         shape.attrs.stroke = color
                     }
-                    // vertx.push(shape.cfg.bbox.x)
-                    // verty.push(shape.cfg.bbox.y)
-                    // graph.paint()
-                    graph.update(node)
+
+
                 }
             })
+            graph.paint()
         })
         graph.on('node:mouseleave', e => {
-            console.log(e)
             const node = e.item
-
-            node.get('group').cfg.children.forEach(shape => {
-                if (shape.cfg.name === 'hexagon-shape') {
-
-                    shape.attrs.fill = hexagonFill
-                    shape.attrs.stroke = color
-                }
-                graph.paint()
+            hexagonShapes.forEach(shape => {
+                shape.attrs.fill = hexagonFill
+                shape.attrs.stroke = color
             })
+            graph.paint()
         })
         /**
          * 判断一个点是否在多边形内部

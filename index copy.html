@@ -27,11 +27,13 @@
             draw(cfg, group) {
                 let keyShape
                 //  最里面圆的半径
-                const baseR = 60;
+                // const baseR = 60;
+                const baseR = 150;
                 // 最外面和相邻内层的间距
                 const out = 60
                 // angle角度
                 let nowAngle = 0;
+                let circleZIndex = 5;
 
                 // Ref line
                 let refR = baseR;
@@ -40,11 +42,22 @@
                 const gap = 20
                 // 生成5个圆环
                 for (let i = 0; i < 5; i++) {
-                    const r = i < 4 ? (refR += refInc) : refR + out
+                    // const r = i < 4 ? (refR += refInc) : refR + out
+                    let r
+                    if(i === 0){
+                        r = refR
+                        refR -= out
+                    }else { 
+                        r = refR
+                        refR -= refInc
+                    }
                     let lineDash
                     let stroke
+                    let fill
                     if (i === 0) {
-                        stroke = cfg.color
+                        // stroke = cfg.color
+                        stroke ='r(0.5, 0.5, 0.1) 0:#ffffff 1:#1890ff'
+                        // fill = 'red'
 
                     } else {
                         stroke = '#3AE7D6'
@@ -57,13 +70,13 @@
                     }
                     // 返回最外层的圆环为keyshape，响应drag-node
                     keyShape = group.addShape('circle', {
-
+                        // zIndex:circleZIndex--,
                         attrs: {
                             x: 0,
                             y: 0,
                             r,  // 每外侧比内层圆环的半径多refInc
                             stroke,
-                            fill: 'transparent', // 必须给fill一个颜色，透明也行，否则在节点内部空白区域拖动的话不起效果
+                            fill: fill || 'transparent', // 必须给fill一个颜色，透明也行，否则在节点内部空白区域拖动的话不起效果
                             lineDash,
                             // fill: i === 0 ? 'red' : '',
                             shadowColor: '#5ad8a6',
@@ -73,6 +86,27 @@
                         name: 'circle-shape',
                         draggable: true
                     });
+                   
+                    if (i === 4) {
+                        
+                        // 因为zIndex的关系，后面生成的circle挡住了前面生成的，所以事件不生效
+                        keyShape.on('mouseover', function () {
+                           
+                            keyShape.animate(
+                                {
+
+                                    fill: '#22A3C3'
+                                    // fill: 'red'
+                                },
+                                {
+                                    repeat: false,
+                                    duration: 200,
+                                },
+                            );
+                        });
+                        
+                    }
+                    
 
 
                 }
@@ -82,7 +116,8 @@
                     // 计算六边形的位置
                     const postions = [];
                     cat.values.forEach((item, index) => {
-                        const r = baseR + item;  //160
+                        // const r = baseR + item;  //160
+                        const r = baseR;  //160
                         const xPos = r * Math.cos(nowAngle);
                         const yPos = r * Math.sin(nowAngle);
                         nowAngle += everyIncAngle;
@@ -107,7 +142,7 @@
                             if (!cat.hexagonStyle) {
                                 cat.hexagonStyle = {}
                             }
-                            group.addShape('path', {
+                            const hexagonShape = group.addShape('path', {
 
                                 attrs: {
                                     path: [
@@ -139,69 +174,125 @@
                                 // name: 'circle-marker-shape',
 
                             });
+                            // 加上交互动画
+                            hexagonShape.on('mousemove', function () {
+                                // 本不应该用动画的，但是直接改变属性不起效果
+                                hexagonShape.animate(
+                                    {
+
+                                        fill: '#22A3C3'
+                                    },
+                                    {
+                                        repeat: false,
+                                        duration: 0,
+                                    },
+                                );
+                            });
+                            hexagonShape.on('mouseout', function () {
+                                console.log('逮住了')
+                                hexagonShape.animate(
+                                    {
+                                        fill: '#091430'
+
+                                    },
+                                    {
+                                        repeat: false,
+                                        duration: 0,
+                                    },
+                                );
+                            });
+                            // set the name
+                            hexagonShape.set('name', 'littleCircle');
 
                             // 添加图标
                             let width = 20
                             let height = 15
-                            group.addShape('image', {
+                            // const hexagonImage = group.addShape('image', {
 
-                                attrs: {
-                                    x: pos[0] - width / 2, // x,y是图片左上角的坐标
-                                    y: pos[1] - height,
-                                    width,
-                                    height,
-                                    cursor: 'pointer',
-                                    img: 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjA0MDIzMDk2NTE3IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjMzOTEiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PGRlZnM+PHN0eWxlIHR5cGU9InRleHQvY3NzIj48L3N0eWxlPjwvZGVmcz48cGF0aCBkPSJNODUzLjcgNjMuN2MtMjAuNS0xMy4yLTQ4LjktMjQuOC04NC40LTM0LjVDNzAwLjIgMTAuNCA2MDguOCAwIDUxMiAwUzMyMy44IDEwLjQgMjU0LjcgMjkuMmMtMzUuNSA5LjctNjMuOSAyMS4zLTg0LjQgMzQuNUMxNTEgNzYuMiAxMjggOTcuNCAxMjggMTI4djc2OGMwIDMwLjYgMjMgNTEuOCA0Mi4zIDY0LjMgMjAuNSAxMy4yIDQ4LjkgMjQuOCA4NC40IDM0LjUgNjkuMSAxOC45IDE2MC41IDI5LjIgMjU3LjMgMjkuMnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMzUuNS05LjcgNjMuOS0yMS4zIDg0LjQtMzQuNUM4NzMgOTQ3LjggODk2IDkyNi42IDg5NiA4OTZWMTI4YzAtMzAuNi0yMy01MS44LTQyLjMtNjQuM3pNODMyIDM4My4xYy0zIDUuOS0yNSAyNC43LTkxLjcgNDEuMUM2NzggNDM5LjUgNTk2LjkgNDQ4IDUxMiA0NDhzLTE2Ni04LjUtMjI4LjMtMjMuOEMyMTcgNDA3LjcgMTk1IDM4OSAxOTIgMzgzLjFWMjA0LjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCAyNDUuNiA0MTUuMiAyNTYgNTEyIDI1NnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOHogbTAgMjU2Yy0zIDUuOS0yNSAyNC43LTkxLjcgNDEuMUM2NzggNjk1LjUgNTk2LjkgNzA0IDUxMiA3MDRzLTE2Ni04LjUtMjI4LjMtMjMuOEMyMTcgNjYzLjcgMTk1IDY0NSAxOTIgNjM5LjFWNDYwLjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCA1MDEuNiA0MTUuMiA1MTIgNTEyIDUxMnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOHpNMjgzLjcgODcuOEMzNDYgNzIuNSA0MjcuMSA2NCA1MTIgNjRzMTY2IDguNSAyMjguMyAyMy44YzYzLjQgMTUuNiA4Ni40IDMzLjQgOTEuMSA0MC4yLTQuNiA2LjgtMjcuNyAyNC41LTkxLjEgNDAuMkM2NzggMTgzLjUgNTk2LjkgMTkyIDUxMiAxOTJzLTE2Ni04LjUtMjI4LjMtMjMuOGMtNjMuNC0xNS42LTg2LjQtMzMuNC05MS4xLTQwLjIgNC42LTYuOCAyNy42LTI0LjUgOTEuMS00MC4yeiBtNDU2LjYgODQ4LjRDNjc4IDk1MS41IDU5Ni45IDk2MCA1MTIgOTYwcy0xNjYtOC41LTIyOC4zLTIzLjhDMjE3LjEgOTE5LjcgMTk1IDkwMSAxOTIgODk1LjFWNzE2LjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCA3NTcuNiA0MTUuMiA3NjggNTEyIDc2OHMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOGMtMyA1LjktMjUuMSAyNC42LTkxLjcgNDEuMXoiIGZpbGw9IiNmZmZmZmYiIHAtaWQ9IjMzOTIiPjwvcGF0aD48L3N2Zz4=',
-                                },
-                                // must be assigned in G6 3.3 and later versions. it can be any value you want
-                                name: 'image-shape',
-                            });
+                            //     attrs: {
+                            //         x: pos[0] - width / 2, // x,y是图片左上角的坐标
+                            //         y: pos[1] - height,
+                            //         width,
+                            //         height,
+                            //         cursor: 'pointer',
+                            //         img: 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjA0MDIzMDk2NTE3IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjMzOTEiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PGRlZnM+PHN0eWxlIHR5cGU9InRleHQvY3NzIj48L3N0eWxlPjwvZGVmcz48cGF0aCBkPSJNODUzLjcgNjMuN2MtMjAuNS0xMy4yLTQ4LjktMjQuOC04NC40LTM0LjVDNzAwLjIgMTAuNCA2MDguOCAwIDUxMiAwUzMyMy44IDEwLjQgMjU0LjcgMjkuMmMtMzUuNSA5LjctNjMuOSAyMS4zLTg0LjQgMzQuNUMxNTEgNzYuMiAxMjggOTcuNCAxMjggMTI4djc2OGMwIDMwLjYgMjMgNTEuOCA0Mi4zIDY0LjMgMjAuNSAxMy4yIDQ4LjkgMjQuOCA4NC40IDM0LjUgNjkuMSAxOC45IDE2MC41IDI5LjIgMjU3LjMgMjkuMnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMzUuNS05LjcgNjMuOS0yMS4zIDg0LjQtMzQuNUM4NzMgOTQ3LjggODk2IDkyNi42IDg5NiA4OTZWMTI4YzAtMzAuNi0yMy01MS44LTQyLjMtNjQuM3pNODMyIDM4My4xYy0zIDUuOS0yNSAyNC43LTkxLjcgNDEuMUM2NzggNDM5LjUgNTk2LjkgNDQ4IDUxMiA0NDhzLTE2Ni04LjUtMjI4LjMtMjMuOEMyMTcgNDA3LjcgMTk1IDM4OSAxOTIgMzgzLjFWMjA0LjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCAyNDUuNiA0MTUuMiAyNTYgNTEyIDI1NnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOHogbTAgMjU2Yy0zIDUuOS0yNSAyNC43LTkxLjcgNDEuMUM2NzggNjk1LjUgNTk2LjkgNzA0IDUxMiA3MDRzLTE2Ni04LjUtMjI4LjMtMjMuOEMyMTcgNjYzLjcgMTk1IDY0NSAxOTIgNjM5LjFWNDYwLjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCA1MDEuNiA0MTUuMiA1MTIgNTEyIDUxMnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOHpNMjgzLjcgODcuOEMzNDYgNzIuNSA0MjcuMSA2NCA1MTIgNjRzMTY2IDguNSAyMjguMyAyMy44YzYzLjQgMTUuNiA4Ni40IDMzLjQgOTEuMSA0MC4yLTQuNiA2LjgtMjcuNyAyNC41LTkxLjEgNDAuMkM2NzggMTgzLjUgNTk2LjkgMTkyIDUxMiAxOTJzLTE2Ni04LjUtMjI4LjMtMjMuOGMtNjMuNC0xNS42LTg2LjQtMzMuNC05MS4xLTQwLjIgNC42LTYuOCAyNy42LTI0LjUgOTEuMS00MC4yeiBtNDU2LjYgODQ4LjRDNjc4IDk1MS41IDU5Ni45IDk2MCA1MTIgOTYwcy0xNjYtOC41LTIyOC4zLTIzLjhDMjE3LjEgOTE5LjcgMTk1IDkwMSAxOTIgODk1LjFWNzE2LjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCA3NTcuNiA0MTUuMiA3NjggNTEyIDc2OHMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOGMtMyA1LjktMjUuMSAyNC42LTkxLjcgNDEuMXoiIGZpbGw9IiNmZmZmZmYiIHAtaWQ9IjMzOTIiPjwvcGF0aD48L3N2Zz4=',
+                            //     },
+                            //     // must be assigned in G6 3.3 and later versions. it can be any value you want
+                            //     name: 'image-shape',
+                            // });
+                            // hexagonImage.on('mousemove', function () {
+
+                            //     hexagonShape.animate(
+                            //         {
+
+                            //             fill: '#22A3C3'
+                            //         },
+                            //         {
+                            //             repeat: false,
+                            //             duration: 200,
+                            //         },
+                            //     );
+                            // });
+                            // hexagonImage.on('mouseout', function () {
+                            //     hexagonShape.animate(
+                            //         {
+                            //             fill: '#091430'
+
+                            //         },
+                            //         {
+                            //             repeat: false,
+                            //             duration: 200,
+                            //         },
+                            //     );
+                            // });
 
                             // 添加六边形内的文本节点
-                            group.addShape('text', {
-                                // attrs: style
-                                attrs: {
-                                    x: pos[0], // 居中
-                                    y: pos[1],
-                                    textAlign: 'center',
-                                    textBaseline: 'top',
-                                    text: cat.label,
-                                    fontSize: 10,
-                                    cursor: 'pointer',
-                                    fill: '#D5D7E3',
-                                },
-                                // must be assigned in G6 3.3 and later versions. it can be any value you want
-                                name: 'text-shape',
-                                // 设置 draggable 以允许响应鼠标的图拽事件
-                                draggable: true,
-                            });
+                            // const hexagonTest = group.addShape('text', {
+                            //     // attrs: style
+                            //     attrs: {
+                            //         x: pos[0], // 居中
+                            //         y: pos[1],
+                            //         textAlign: 'center',
+                            //         textBaseline: 'top',
+                            //         text: cat.label,
+                            //         fontSize: 10,
+                            //         cursor: 'pointer',
+                            //         fill: '#D5D7E3',
+                            //     },
+                            //     // must be assigned in G6 3.3 and later versions. it can be any value you want
+                            //     name: 'text-shape',
+                            //     // 设置 draggable 以允许响应鼠标的图拽事件
+                            //     draggable: true,
+                            // });
+                            // hexagonTest.on('mousemove', function () {
+                            //     hexagonShape.animate(
+                            //         {
+
+                            //             fill: '#22A3C3'
+                            //         },
+                            //         {
+                            //             repeat: false,
+                            //             duration: 200,
+                            //         },
+                            //     );
+                            // });
+                            // hexagonTest.on('mouseout', function () {
+                            //     hexagonShape.animate(
+                            //         {
+                            //             fill: '#091430'
+
+                            //         },
+                            //         {
+                            //             repeat: false,
+                            //             duration: 200,
+                            //         },
+                            //     );
+                            // });
 
                         }
                     });
                 });
 
-                // let nowAngle2 = 0;
-                // const everyIncAngleCat = (2 * Math.PI * (360 / 5)) / 360;
-                // 横穿圆环的竖线
-                // for (let i = 0; i < 5; i++) {
-                //     const r = 30 + 50;
-                //     const xPos = r * Math.cos(nowAngle2);
-                //     const yPos = r * Math.sin(nowAngle2);
-
-                //     group.addShape('path', {
-                //         attrs: {
-                //             path: [
-                //                 ['M', 0, 0],
-                //                 ['L', xPos, yPos],
-                //             ],
-                //             lineDash: [4, 4],
-                //             stroke: '#5ad8a6',
-                //         },
-                //         name: 'path-shape',
-                //     });
-                //     nowAngle2 += everyIncAngleCat;
-                // }
-                // add a circle with the same color with the background color
 
                 // 添加内层圆的label
                 if (cfg.label) {
@@ -243,17 +334,17 @@
                     opacity: 0.6,
                 }
                 const back1 = group.addShape('circle', {
-                    zIndex: -3,
+                    zIndex: -8,
                     attrs,
                     name: 'back1-shape',
                 });
                 const back2 = group.addShape('circle', {
-                    zIndex: -2,
+                    zIndex: -7,
                     attrs,
                     name: 'back2-shape',
                 });
                 const back3 = group.addShape('circle', {
-                    zIndex: -1,
+                    zIndex: -6,
                     attrs,
                     name: 'back3-shape',
                 });
@@ -319,7 +410,7 @@
                     },
                     {
                         repeat: true, // whether executes the animation repeatly
-                        duration: 10000, // the duration for executing once
+                        duration: 3000, // the duration for executing once
                     },
                 );
                 // 小虚线
@@ -340,7 +431,7 @@
                     },
                     {
                         repeat: true, // whether executes the animation repeatly
-                        duration: 10000, // the duration for executing once
+                        duration: 3000, // the duration for executing once
                     },
                 );
             },
@@ -412,60 +503,57 @@
 
         graph.data(data);
         graph.render();
+        let hexagonShapes = []
+        // graph.on('node:mouseover', e => {
 
-        graph.on('node:mouseover', e => {
-            console.log(e)
-            const node = e.item
-            // 获取鼠标点击的x,y
-            const testx = e.x
-            const testy = e.y
-            const nodeX = node.get('model').x
-            const nodeY = node.get('model').y
-            node.get('group').cfg.children.forEach(shape => {
-                if (shape.cfg.name === 'hexagon-shape') {
+        //     const node = e.item
+        //     // 获取鼠标点击的x,y
+        //     const testx = e.x
+        //     const testy = e.y
+        //     const nodeX = node.get('model').x
+        //     const nodeY = node.get('model').y
+        //     // 第一次将hexagon-shape筛选出来，下次直接遍历过滤后的，这样性能好一点,减小动画的卡动感
+        //     if (!hexagonShapes.length) {
 
-                    // 计算每个六边形的6个顶点的坐标
-                    // 因为bbox属性不稳定，有时候能获取到，有时候获取不到
-                    // let { x, y, maxX, maxY } = shape.cfg.bbox
-                    const path = shape.attrs.path
-                    // 还需要加上节点的x，y坐标
+        //         hexagonShapes = node.get('group').cfg.children.filter(shape => {
+        //             return shape.cfg.name === 'hexagon-shape'
 
-                    // maxX += nodeX
+        //         })
+        //     }
+        //     hexagonShapes.forEach(shape => {
+        //         if (shape.cfg.name === 'hexagon-shape') {
 
-                    // maxY += nodeY
-                    // const vertx = [x, x + maxX / 2, x + maxX, x + maxX, x + maxX / 2, x]
-                    // const verty = [y + maxY / 4, y, y + maxY / 4, y + 3 * maxY / 4, y + maxY, y + 3 * maxY / 4]
-                    const vertx = [nodeX + path[0][1], nodeX + path[1][1], nodeX + path[2][1], nodeX + path[3][1], nodeX + path[4][1], nodeX + path[5][1]]
-                    const verty = [nodeY + path[0][2], nodeY + path[1][2], nodeY + path[2][2], nodeY + path[3][2], nodeY + path[4][2], nodeY + path[5][2]]
-                    const isInHex = pnpoly(data.nodes[0].details.length, vertx, verty, testx, testy)
-                    // 在六边形内的话，找到shape，高亮该shape
-                    if (isInHex) {
-                        shape.attrs.fill = color
-                    } else {
-                        // 在元素内部移出六边形的时候，恢复颜色
-                        shape.attrs.fill = hexagonFill
-                        shape.attrs.stroke = color
-                    }
-                    // vertx.push(shape.cfg.bbox.x)
-                    // verty.push(shape.cfg.bbox.y)
-                    // graph.paint()
-                    graph.update(node)
-                }
-            })
-        })
-        graph.on('node:mouseleave', e => {
-            console.log(e)
-            const node = e.item
+        //             // 计算每个六边形的6个顶点的坐标
+        //             // 因为bbox属性不稳定，有时候能获取到，有时候获取不到
+        //             // let { x, y, maxX, maxY } = shape.cfg.bbox
+        //             const path = shape.attrs.path
+        //             // 还需要加上节点的x，y坐标
+        //             const vertx = [nodeX + path[0][1], nodeX + path[1][1], nodeX + path[2][1], nodeX + path[3][1], nodeX + path[4][1], nodeX + path[5][1]]
+        //             const verty = [nodeY + path[0][2], nodeY + path[1][2], nodeY + path[2][2], nodeY + path[3][2], nodeY + path[4][2], nodeY + path[5][2]]
+        //             const isInHex = pnpoly(data.nodes[0].details.length, vertx, verty, testx, testy)
+        //             // 在六边形内的话，找到shape，高亮该shape
+        //             if (isInHex) {
+        //                 shape.attrs.fill = color
 
-            node.get('group').cfg.children.forEach(shape => {
-                if (shape.cfg.name === 'hexagon-shape') {
+        //             } else {
+        //                 // 在元素内部移出六边形的时候，恢复颜色
+        //                 shape.attrs.fill = hexagonFill
+        //                 shape.attrs.stroke = color
+        //             }
 
-                    shape.attrs.fill = hexagonFill
-                    shape.attrs.stroke = color
-                }
-                graph.paint()
-            })
-        })
+
+        //         }
+        //     })
+        //     graph.paint()
+        // })
+        // graph.on('node:mouseleave', e => {
+        //     const node = e.item
+        //     hexagonShapes.forEach(shape => {
+        //         shape.attrs.fill = hexagonFill
+        //         shape.attrs.stroke = color
+        //     })
+        //     graph.paint()
+        // })
         /**
          * 判断一个点是否在多边形内部
          * nvert:多边形有几个顶点
