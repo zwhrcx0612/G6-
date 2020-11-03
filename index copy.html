@@ -54,15 +54,17 @@
                     let lineDash
                     let stroke
                     let fill
-                    if (i === 0) {
+                    if (i === 4) {
                         // stroke = cfg.color
-                        stroke ='r(0.5, 0.5, 0.1) 0:#ffffff 1:#1890ff'
+                        fill ='r(0.4, 0.4, 0.5) 0:#ffffff 0.5:#7ec2f3 1:#1890ff'
+                        // fill ='r(0.5, 0.5, 0.1) 0.5:#ffffff 0.5:#1890ff'
+                        
                         // fill = 'red'
 
                     } else {
                         stroke = '#3AE7D6'
                     }
-                    if (i === 1) {
+                    if (i === 3) {
                         lineDash = [(2 * Math.PI * r - gap * 4) / 4, 20]
                     }
                     if (i === 2) {
@@ -104,6 +106,21 @@
                                 },
                             );
                         });
+
+                        keyShape.on('mouseout', function () {
+                           
+                           keyShape.animate(
+                               {
+
+                                   fill: '#091430'
+                                   // fill: 'red'
+                               },
+                               {
+                                   repeat: false,
+                                   duration: 200,
+                               },
+                           );
+                       });
                         
                     }
                     
@@ -207,87 +224,87 @@
                             // 添加图标
                             let width = 20
                             let height = 15
-                            // const hexagonImage = group.addShape('image', {
+                            const hexagonImage = group.addShape('image', {
 
-                            //     attrs: {
-                            //         x: pos[0] - width / 2, // x,y是图片左上角的坐标
-                            //         y: pos[1] - height,
-                            //         width,
-                            //         height,
-                            //         cursor: 'pointer',
-                            //         img: 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjA0MDIzMDk2NTE3IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjMzOTEiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PGRlZnM+PHN0eWxlIHR5cGU9InRleHQvY3NzIj48L3N0eWxlPjwvZGVmcz48cGF0aCBkPSJNODUzLjcgNjMuN2MtMjAuNS0xMy4yLTQ4LjktMjQuOC04NC40LTM0LjVDNzAwLjIgMTAuNCA2MDguOCAwIDUxMiAwUzMyMy44IDEwLjQgMjU0LjcgMjkuMmMtMzUuNSA5LjctNjMuOSAyMS4zLTg0LjQgMzQuNUMxNTEgNzYuMiAxMjggOTcuNCAxMjggMTI4djc2OGMwIDMwLjYgMjMgNTEuOCA0Mi4zIDY0LjMgMjAuNSAxMy4yIDQ4LjkgMjQuOCA4NC40IDM0LjUgNjkuMSAxOC45IDE2MC41IDI5LjIgMjU3LjMgMjkuMnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMzUuNS05LjcgNjMuOS0yMS4zIDg0LjQtMzQuNUM4NzMgOTQ3LjggODk2IDkyNi42IDg5NiA4OTZWMTI4YzAtMzAuNi0yMy01MS44LTQyLjMtNjQuM3pNODMyIDM4My4xYy0zIDUuOS0yNSAyNC43LTkxLjcgNDEuMUM2NzggNDM5LjUgNTk2LjkgNDQ4IDUxMiA0NDhzLTE2Ni04LjUtMjI4LjMtMjMuOEMyMTcgNDA3LjcgMTk1IDM4OSAxOTIgMzgzLjFWMjA0LjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCAyNDUuNiA0MTUuMiAyNTYgNTEyIDI1NnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOHogbTAgMjU2Yy0zIDUuOS0yNSAyNC43LTkxLjcgNDEuMUM2NzggNjk1LjUgNTk2LjkgNzA0IDUxMiA3MDRzLTE2Ni04LjUtMjI4LjMtMjMuOEMyMTcgNjYzLjcgMTk1IDY0NSAxOTIgNjM5LjFWNDYwLjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCA1MDEuNiA0MTUuMiA1MTIgNTEyIDUxMnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOHpNMjgzLjcgODcuOEMzNDYgNzIuNSA0MjcuMSA2NCA1MTIgNjRzMTY2IDguNSAyMjguMyAyMy44YzYzLjQgMTUuNiA4Ni40IDMzLjQgOTEuMSA0MC4yLTQuNiA2LjgtMjcuNyAyNC41LTkxLjEgNDAuMkM2NzggMTgzLjUgNTk2LjkgMTkyIDUxMiAxOTJzLTE2Ni04LjUtMjI4LjMtMjMuOGMtNjMuNC0xNS42LTg2LjQtMzMuNC05MS4xLTQwLjIgNC42LTYuOCAyNy42LTI0LjUgOTEuMS00MC4yeiBtNDU2LjYgODQ4LjRDNjc4IDk1MS41IDU5Ni45IDk2MCA1MTIgOTYwcy0xNjYtOC41LTIyOC4zLTIzLjhDMjE3LjEgOTE5LjcgMTk1IDkwMSAxOTIgODk1LjFWNzE2LjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCA3NTcuNiA0MTUuMiA3NjggNTEyIDc2OHMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOGMtMyA1LjktMjUuMSAyNC42LTkxLjcgNDEuMXoiIGZpbGw9IiNmZmZmZmYiIHAtaWQ9IjMzOTIiPjwvcGF0aD48L3N2Zz4=',
-                            //     },
-                            //     // must be assigned in G6 3.3 and later versions. it can be any value you want
-                            //     name: 'image-shape',
-                            // });
-                            // hexagonImage.on('mousemove', function () {
+                                attrs: {
+                                    x: pos[0] - width / 2, // x,y是图片左上角的坐标
+                                    y: pos[1] - height,
+                                    width,
+                                    height,
+                                    cursor: 'pointer',
+                                    img: 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjA0MDIzMDk2NTE3IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjMzOTEiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PGRlZnM+PHN0eWxlIHR5cGU9InRleHQvY3NzIj48L3N0eWxlPjwvZGVmcz48cGF0aCBkPSJNODUzLjcgNjMuN2MtMjAuNS0xMy4yLTQ4LjktMjQuOC04NC40LTM0LjVDNzAwLjIgMTAuNCA2MDguOCAwIDUxMiAwUzMyMy44IDEwLjQgMjU0LjcgMjkuMmMtMzUuNSA5LjctNjMuOSAyMS4zLTg0LjQgMzQuNUMxNTEgNzYuMiAxMjggOTcuNCAxMjggMTI4djc2OGMwIDMwLjYgMjMgNTEuOCA0Mi4zIDY0LjMgMjAuNSAxMy4yIDQ4LjkgMjQuOCA4NC40IDM0LjUgNjkuMSAxOC45IDE2MC41IDI5LjIgMjU3LjMgMjkuMnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMzUuNS05LjcgNjMuOS0yMS4zIDg0LjQtMzQuNUM4NzMgOTQ3LjggODk2IDkyNi42IDg5NiA4OTZWMTI4YzAtMzAuNi0yMy01MS44LTQyLjMtNjQuM3pNODMyIDM4My4xYy0zIDUuOS0yNSAyNC43LTkxLjcgNDEuMUM2NzggNDM5LjUgNTk2LjkgNDQ4IDUxMiA0NDhzLTE2Ni04LjUtMjI4LjMtMjMuOEMyMTcgNDA3LjcgMTk1IDM4OSAxOTIgMzgzLjFWMjA0LjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCAyNDUuNiA0MTUuMiAyNTYgNTEyIDI1NnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOHogbTAgMjU2Yy0zIDUuOS0yNSAyNC43LTkxLjcgNDEuMUM2NzggNjk1LjUgNTk2LjkgNzA0IDUxMiA3MDRzLTE2Ni04LjUtMjI4LjMtMjMuOEMyMTcgNjYzLjcgMTk1IDY0NSAxOTIgNjM5LjFWNDYwLjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCA1MDEuNiA0MTUuMiA1MTIgNTEyIDUxMnMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOHpNMjgzLjcgODcuOEMzNDYgNzIuNSA0MjcuMSA2NCA1MTIgNjRzMTY2IDguNSAyMjguMyAyMy44YzYzLjQgMTUuNiA4Ni40IDMzLjQgOTEuMSA0MC4yLTQuNiA2LjgtMjcuNyAyNC41LTkxLjEgNDAuMkM2NzggMTgzLjUgNTk2LjkgMTkyIDUxMiAxOTJzLTE2Ni04LjUtMjI4LjMtMjMuOGMtNjMuNC0xNS42LTg2LjQtMzMuNC05MS4xLTQwLjIgNC42LTYuOCAyNy42LTI0LjUgOTEuMS00MC4yeiBtNDU2LjYgODQ4LjRDNjc4IDk1MS41IDU5Ni45IDk2MCA1MTIgOTYwcy0xNjYtOC41LTIyOC4zLTIzLjhDMjE3LjEgOTE5LjcgMTk1IDkwMSAxOTIgODk1LjFWNzE2LjNjMTcuNCA4LjMgMzguNCAxNS45IDYyLjcgMjIuNUMzMjMuOCA3NTcuNiA0MTUuMiA3NjggNTEyIDc2OHMxODguMi0xMC40IDI1Ny4zLTI5LjJjMjQuMy02LjYgNDUuMy0xNC4yIDYyLjctMjIuNXYxNzguOGMtMyA1LjktMjUuMSAyNC42LTkxLjcgNDEuMXoiIGZpbGw9IiNmZmZmZmYiIHAtaWQ9IjMzOTIiPjwvcGF0aD48L3N2Zz4=',
+                                },
+                                // must be assigned in G6 3.3 and later versions. it can be any value you want
+                                name: 'image-shape',
+                            });
+                            hexagonImage.on('mousemove', function () {
 
-                            //     hexagonShape.animate(
-                            //         {
+                                hexagonShape.animate(
+                                    {
 
-                            //             fill: '#22A3C3'
-                            //         },
-                            //         {
-                            //             repeat: false,
-                            //             duration: 200,
-                            //         },
-                            //     );
-                            // });
-                            // hexagonImage.on('mouseout', function () {
-                            //     hexagonShape.animate(
-                            //         {
-                            //             fill: '#091430'
+                                        fill: '#22A3C3'
+                                    },
+                                    {
+                                        repeat: false,
+                                        duration: 200,
+                                    },
+                                );
+                            });
+                            hexagonImage.on('mouseout', function () {
+                                hexagonShape.animate(
+                                    {
+                                        fill: '#091430'
 
-                            //         },
-                            //         {
-                            //             repeat: false,
-                            //             duration: 200,
-                            //         },
-                            //     );
-                            // });
+                                    },
+                                    {
+                                        repeat: false,
+                                        duration: 200,
+                                    },
+                                );
+                            });
 
                             // 添加六边形内的文本节点
-                            // const hexagonTest = group.addShape('text', {
-                            //     // attrs: style
-                            //     attrs: {
-                            //         x: pos[0], // 居中
-                            //         y: pos[1],
-                            //         textAlign: 'center',
-                            //         textBaseline: 'top',
-                            //         text: cat.label,
-                            //         fontSize: 10,
-                            //         cursor: 'pointer',
-                            //         fill: '#D5D7E3',
-                            //     },
-                            //     // must be assigned in G6 3.3 and later versions. it can be any value you want
-                            //     name: 'text-shape',
-                            //     // 设置 draggable 以允许响应鼠标的图拽事件
-                            //     draggable: true,
-                            // });
-                            // hexagonTest.on('mousemove', function () {
-                            //     hexagonShape.animate(
-                            //         {
+                            const hexagonTest = group.addShape('text', {
+                                // attrs: style
+                                attrs: {
+                                    x: pos[0], // 居中
+                                    y: pos[1],
+                                    textAlign: 'center',
+                                    textBaseline: 'top',
+                                    text: cat.label,
+                                    fontSize: 10,
+                                    cursor: 'pointer',
+                                    fill: '#D5D7E3',
+                                },
+                                // must be assigned in G6 3.3 and later versions. it can be any value you want
+                                name: 'text-shape',
+                                // 设置 draggable 以允许响应鼠标的图拽事件
+                                draggable: true,
+                            });
+                            hexagonTest.on('mousemove', function () {
+                                hexagonShape.animate(
+                                    {
 
-                            //             fill: '#22A3C3'
-                            //         },
-                            //         {
-                            //             repeat: false,
-                            //             duration: 200,
-                            //         },
-                            //     );
-                            // });
-                            // hexagonTest.on('mouseout', function () {
-                            //     hexagonShape.animate(
-                            //         {
-                            //             fill: '#091430'
+                                        fill: '#22A3C3'
+                                    },
+                                    {
+                                        repeat: false,
+                                        duration: 200,
+                                    },
+                                );
+                            });
+                            hexagonTest.on('mouseout', function () {
+                                hexagonShape.animate(
+                                    {
+                                        fill: '#091430'
 
-                            //         },
-                            //         {
-                            //             repeat: false,
-                            //             duration: 200,
-                            //         },
-                            //     );
-                            // });
+                                    },
+                                    {
+                                        repeat: false,
+                                        duration: 200,
+                                    },
+                                );
+                            });
 
                         }
                     });
@@ -317,7 +334,7 @@
                 return group;
             },
             afterDraw(cfg, group) {
-                const r = 70
+                const r = 60
                 // 
                 /**
                  * 节点动画的实现思路
@@ -391,7 +408,7 @@
 
                 // 给圆的虚线边添加动画
                 // 大虚线
-                const shape = group.get('children')[4];
+                const shape = group.get('children')[6];
                 let index = 0;
                 let gap = 20
                 // Define the animation
