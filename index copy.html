@@ -44,21 +44,22 @@
                 for (let i = 0; i < 5; i++) {
                     // const r = i < 4 ? (refR += refInc) : refR + out
                     let r
-                    if(i === 0){
+                    if (i === 0) {
                         r = refR
                         refR -= out
-                    }else { 
+                    } else {
                         r = refR
                         refR -= refInc
                     }
                     let lineDash
                     let stroke
                     let fill
+                    let cursor
                     if (i === 4) {
                         // stroke = cfg.color
-                        fill ='r(0.4, 0.4, 0.5) 0:#ffffff 0.5:#7ec2f3 1:#1890ff'
-                        // fill ='r(0.5, 0.5, 0.1) 0.5:#ffffff 0.5:#1890ff'
-                        
+                        // fill ='r(0.5, 0.5, 0.5) 0:#091430 0.5:#7ec2f3 1:#091430'
+                        fill = 'r(0.5, 0.5, 0.5) 0.5:#091430 1:#22A3C3'
+                        cursor = 'pointer'
                         // fill = 'red'
 
                     } else {
@@ -82,48 +83,49 @@
                             lineDash,
                             // fill: i === 0 ? 'red' : '',
                             shadowColor: '#5ad8a6',
-                            shadowBlur: 50
+                            shadowBlur: 50,
+                            cursor: cursor || 'initial'
 
                         },
                         name: 'circle-shape',
                         draggable: true
                     });
-                   
+
                     if (i === 4) {
-                        
-                        // 因为zIndex的关系，后面生成的circle挡住了前面生成的，所以事件不生效
+
+                        // 因为zIndex的关系，后面生成的circle挡住了前面生成的，所以事件不生效，改变zIndex不生效，于是改变了circle的生成顺序，先生成最外面的，依次向内
                         keyShape.on('mouseover', function () {
-                           
+
                             keyShape.animate(
                                 {
 
-                                    fill: '#22A3C3'
+                                    fill: 'r(0.5, 0.5, 0.5)  1:#22A3C3'
                                     // fill: 'red'
                                 },
                                 {
                                     repeat: false,
-                                    duration: 200,
+                                    duration: 0,
                                 },
                             );
                         });
 
-                        keyShape.on('mouseout', function () {
-                           
-                           keyShape.animate(
-                               {
+                        keyShape.on('mouseout', function (e) {
 
-                                   fill: '#091430'
-                                   // fill: 'red'
-                               },
-                               {
-                                   repeat: false,
-                                   duration: 200,
-                               },
-                           );
-                       });
-                        
+                            keyShape.animate(
+                                {
+
+                                    fill: 'r(0.5, 0.5, 0.5) 0.5:#091430 1:#22A3C3'
+                                    // fill: 'red'
+                                },
+                                {
+                                    repeat: false,
+                                    duration: 0,
+                                },
+                            );
+                        });
+
                     }
-                    
+
 
 
                 }
@@ -178,6 +180,7 @@
                                     lineWidth: 1,
                                     cursor: 'pointer',
                                     fill: cat.hexagonStyle.fill || hexagonFill,
+                                    // fill: 'r(0.5, 0.5, 0.5) 0.5:#091430 1:#22A3C3',
                                     // shadowOffsetX:-1,
                                     // shadowOffsetY:-1,
                                     stroke: cat.color, // 颜色应用到描边上，如果应用到填充，则使用 fill: cfg.color
@@ -192,7 +195,7 @@
 
                             });
                             // 加上交互动画
-                            hexagonShape.on('mousemove', function () {
+                            hexagonShape.on('mousemove', function (e) {
                                 // 本不应该用动画的，但是直接改变属性不起效果
                                 hexagonShape.animate(
                                     {
@@ -206,7 +209,7 @@
                                 );
                             });
                             hexagonShape.on('mouseout', function () {
-                                console.log('逮住了')
+                                
                                 hexagonShape.animate(
                                     {
                                         fill: '#091430'
@@ -246,7 +249,7 @@
                                     },
                                     {
                                         repeat: false,
-                                        duration: 200,
+                                        duration: 0,
                                     },
                                 );
                             });
@@ -258,7 +261,7 @@
                                     },
                                     {
                                         repeat: false,
-                                        duration: 200,
+                                        duration: 0,
                                     },
                                 );
                             });
@@ -289,7 +292,7 @@
                                     },
                                     {
                                         repeat: false,
-                                        duration: 200,
+                                        duration: 0,
                                     },
                                 );
                             });
@@ -301,7 +304,7 @@
                                     },
                                     {
                                         repeat: false,
-                                        duration: 200,
+                                        duration: 0,
                                     },
                                 );
                             });
@@ -313,7 +316,7 @@
 
                 // 添加内层圆的label
                 if (cfg.label) {
-                    group.addShape('text', {
+                    const circleLabelShape = group.addShape('text', {
 
                         attrs: {
                             x: 0,
@@ -328,6 +331,22 @@
                         // 设置 draggable 以允许响应鼠标的图拽事件
                         draggable: true,
                     });
+                    circleLabelShape.on('mousemove', function () {
+
+                        keyShape.animate(
+                            {
+
+                                fill: 'r(0.5, 0.5, 0.5)  1:#22A3C3'
+                                // fill: 'red'
+                            },
+                            {
+                                repeat: false,
+                                duration: 0,
+                            },
+                        );
+                    });
+
+                   
                 }
 
                 // return keyShape;
